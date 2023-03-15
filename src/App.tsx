@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
+import { pointA, pointB, chunkedPoints } from "./utils/points";
 import "./styles.css";
 import "leaflet/dist/leaflet.css";
 
@@ -15,17 +16,20 @@ let DefaultIcon = L.icon({
   iconSize: [30, 30],
 });
 export default function App() {
-  const [loc, setLoc] = useState<[number, number]>([
-    defaultPosition.lat,
-    defaultPosition.lng,
-  ]);
+  const [loc, setLoc] = useState<[number, number]>([pointA[0], pointA[1]]);
+  const [increment, setIncrement] = useState(0);
   const [isHide, setIsHide] = useState(true);
 
   setTimeout(() => setIsHide(false), 5000);
 
   useEffect(() => {
     const timeOutId = setTimeout(() => {
-      setLoc((oldState) => [oldState[0], oldState[1] + 0.00001]);
+      if (chunkedPoints.length - 1 > increment) {
+        setIncrement(increment + 1);
+        setLoc([chunkedPoints[increment][0], chunkedPoints[increment][1]]);
+      } else {
+        setLoc(pointB as [number, number]);
+      }
     }, 1000);
     return () => clearTimeout(timeOutId);
   }, [loc]);
@@ -38,7 +42,6 @@ export default function App() {
       center={[38.86784718714166, -77.08996175162719]}
       zoom={defaultPosition.zoom}
     >
-      {console.log(loc, " ----------------- ")}
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
